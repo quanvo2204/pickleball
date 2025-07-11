@@ -1,0 +1,72 @@
+services:
+  pickleball-shop:
+    build: 
+      context: .
+      dockerfile: docker/app/Dockerfile
+    image: pickleball-shop:v1.0
+    container_name: pickleball-shop
+    environment:
+      DB_CONNECTION: ${DB_CONNECTION}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    networks:
+      - app
+
+    
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./src:/var/www
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - pickleball-shop
+    networks:
+      - app
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: 127.0.0.1:24224
+        tag: nginx.access
+
+  fluentbit:
+    image: fluent/fluent-bit:latest
+    container_name: fluentbit
+    volumes:
+      - ./docker/fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./docker/fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/log:/var/log:ro
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+      - "2020:2020"  # Web UI nếu cần
+    networks:
+      - app
+
+  database:
+    image: mysql:latest
+    container_name: database
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./db:/docker-entrypoint-initdb.d
+    networks:
+      - app
+
+volumes:
+  db_data:
+
+networks:
+  app:
+    driver: bridge

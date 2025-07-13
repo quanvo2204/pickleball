@@ -1,6 +1,8 @@
+#version: '3.8'
+
 services:
   pickleball-shop:
-    build: 
+    build:
       context: .
       dockerfile: docker/app/Dockerfile
     image: pickleball-shop:v1.0
@@ -13,9 +15,8 @@ services:
       DB_USERNAME: root
       DB_PASSWORD: root
     networks:
-      - app
+      app:
 
-    
   nginx:
     image: nginx:latest
     container_name: nginx
@@ -27,13 +28,10 @@ services:
       - ./nginx/logs:/var/log/nginx
     depends_on:
       - pickleball-shop
+      - fluentbit
     networks:
-      - app
-    logging:
-      driver: fluentd
-      options:
-        fluentd-address: 127.0.0.1:24224
-        tag: nginx.access
+      app:
+    command: "nginx -g 'daemon off;'"
 
   fluentbit:
     image: fluent/fluent-bit:latest
@@ -42,13 +40,16 @@ services:
       - ./docker/fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
       - ./docker/fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/log:/var/log:ro
+      - ./nginx/logs:/var/log/nginx:ro
+    depends_on:
+      - splunk
     ports:
       - "24224:24224"
-      - "24224:24224/udp"
-      - "2020:2020"  # Web UI nếu cần
+      - "2020:2020"
+    command: -c /fluent-bit/etc/fluent-bit.conf
     networks:
-      - app
+      app:
+        ipv4_address: 172.28.0.10
 
   database:
     image: mysql:latest
@@ -64,9 +65,25 @@ services:
     networks:
       - app
 
+  splunk:
+    image: splunk/splunk:latest
+    container_name: splunk
+    ports:
+      - "8000:8000"
+      - "8088:8088"
+    environment:
+      - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_PASSWORD=admin@123
+    networks:
+      - app
 volumes:
   db_data:
+  splunk_data:
 
 networks:
   app:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+          ip_range: 172.28.0.0/24

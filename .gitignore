@@ -17,4 +17,4 @@
 /.idea
 /.vscode
 .env
-/nginx/*
+nginx/

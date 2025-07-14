@@ -63,6 +63,18 @@ Go to `Setting` --> `Data Input` --> `HTTP Event Collector` and create/copy the 
 ![HEC token](img/HEC_token.png)
 ### 4. Configure fluentbit to collect logs from Nginx
 In `docker-compose.yml`, bind mount Nginx logs to host dir `./nginx/logs:/var/log/nginx`. \
+Define the [OUTPUT] section to forward logs in `docker/fluent-bit/fluent-bit.conf` \
+```
+[OUTPUT]
+    name         splunk
+    match        *
+    host         splunk  # Ip splunk host
+    port         8088    # HEC port
+    splunk_Send_Raw off
+    splunk_Token 14aa2088-9470-42d3-99da-c5a8fd3c7d02  # Change your HEC token
+    tls          on
+    tls.verify   off
+```
 Fluentbit will collect access logs and error logs from `/var/log/nginx/` and forward log to Splunk.
 ### 5. Create `docker-compose.yml` and copy environtment from `src/`
 ```

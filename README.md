@@ -15,7 +15,7 @@ The original project provides a basic e-commerce website tailored for the Pickle
 - Simple payment integration
 - Built with Laravel and Blade Template
 - Styled with Bootstrap CSS
-## 🛠 What i really did
+## 🛠  What I really did
 This customized version extends the original project by:
 - Dockerizing the entire application using Docker Compose (Laravel, Nginx, PHP-FPM, MySQL)
 - Adding Fluent Bit for log collection from Nginx
@@ -43,7 +43,7 @@ This customized version extends the original project by:
       chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 ```
 ### 2. Create nginx configuration in `docker/nginx/nginx.conf`
-I use Nginx as a reverse proxy to serve the application and forward `.php` requests to app container.
+I used Nginx as a reverse proxy to serve the application and forward `.php` requests to the app container.
 ```
 server {
     listen 80;
@@ -59,10 +59,10 @@ server {
 }
 ```
 ### 3. Create HEC token in Splunk
-Go to `Setting` --> `Data Input` --> `HTTP Event Collector` and create/copy generated token.
+Go to `Setting` --> `Data Input` --> `HTTP Event Collector` and create/copy the generated token.
 ![HEC token](img/HEC_token.png)
 ### 4. Configure fluentbit to collect logs from Nginx
-In `docker-compose.yml` bind mount nginx logs to host dir `./nginx/logs:/var/log/nginx`. \
+In `docker-compose.yml`, bind mount Nginx logs to host dir `./nginx/logs:/var/log/nginx`. \
 Fluentbit will collect access logs and error logs from `/var/log/nginx/` and forward log to Splunk.
 ### 5. Create `docker-compose.yml` and copy environtment from `src/`
 ```
@@ -77,12 +77,12 @@ Fluentbit will collect access logs and error logs from `/var/log/nginx/` and for
     app:
 ```
 ### 6. Deploy all services
-`docker compose up -d` to start up all services. \
-Wait for all services ready. Access to `localhost:80`, If notifacation alerts "mysql connection refused", use this command to clear cache config: \
+Run `docker compose up -d` to start up all services. \
+Wait for all services ready. Access to `localhost:80`. If you see a "MySQL connection refused" error,, use this command to clear cache config: \
 `docker exec -it pickleball-shop php artisan config:cache` \
 `docker exec -it pickleball-shop php artisan config:cache` \
 Our website is online !!!🎉🎉🎉
 ![Pickleball Website](img/web.png)
 ### 7. Finally, go to Splunk and  check
-All logs from Nginx have pushed to Splunk. Now you can enjoy the powerfull splunk's filter !
+All Nginx logs are now forwarded to Splunk. You can now enjoy Splunk's powerful log search and filtering features!
 ![Splunk search](img/splunk_logs.png)

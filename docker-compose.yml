@@ -15,7 +15,7 @@ services:
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
     networks:
-      app:
+      - app
 
   nginx:
     image: nginx:latest
@@ -30,7 +30,7 @@ services:
       - pickleball-shop
       - fluentbit
     networks:
-      app:
+      - app
     command: "nginx -g 'daemon off;'"
 
   fluentbit:
@@ -41,14 +41,11 @@ services:
       - ./docker/fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf
       - /var/lib/docker/containers:/var/lib/docker/containers
       - ./nginx/logs:/var/log/nginx
-    depends_on:
-      - splunk
     ports:
       - "24224:24224"
-      - "2020:2020"
     command: -c /fluent-bit/etc/fluent-bit.conf
     networks:
-      app:
+      - app
 
   database:
     image: mysql:latest
@@ -64,20 +61,8 @@ services:
     networks:
       - app
 
-  splunk:
-    image: splunk/splunk:latest
-    container_name: splunk
-    ports:
-      - "8000:8000"
-      - "8088:8088"
-    environment:
-      - SPLUNK_START_ARGS=--accept-license
-      - SPLUNK_PASSWORD=admin@123
-    networks:
-      - app
 volumes:
   db_data:
-  splunk_data:
 
 networks:
   app:

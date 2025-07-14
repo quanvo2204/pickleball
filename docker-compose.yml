@@ -12,8 +12,8 @@ services:
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
       DB_DATABASE: ${DB_DATABASE}
-      DB_USERNAME: root
-      DB_PASSWORD: root
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
     networks:
       app:
 
@@ -37,10 +37,10 @@ services:
     image: fluent/fluent-bit:latest
     container_name: fluentbit
     volumes:
-      - ./docker/fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
-      - ./docker/fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - ./nginx/logs:/var/log/nginx:ro
+      - ./docker/fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+      - ./docker/fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf
+      - /var/lib/docker/containers:/var/lib/docker/containers
+      - ./nginx/logs:/var/log/nginx
     depends_on:
       - splunk
     ports:
@@ -49,7 +49,6 @@ services:
     command: -c /fluent-bit/etc/fluent-bit.conf
     networks:
       app:
-        ipv4_address: 172.28.0.10
 
   database:
     image: mysql:latest
@@ -82,8 +81,3 @@ volumes:
 
 networks:
   app:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.28.0.0/16
-          ip_range: 172.28.0.0/24

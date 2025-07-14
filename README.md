@@ -82,7 +82,7 @@ Wait for all services ready. Access to `localhost:80`, If notifacation alerts "m
 `docker exec -it pickleball-shop php artisan config:cache` \
 `docker exec -it pickleball-shop php artisan config:cache` \
 Our website is online !!!🎉🎉🎉
-![Pickleball Website](img/web.pnb)
+![Pickleball Website](img/web.png)
 ### 7. Finally, go to Splunk and  check
 All logs from Nginx have pushed to Splunk. Now you can enjoy the powerfull splunk's filter !
 ![Splunk search](img/splunk_logs.png)
